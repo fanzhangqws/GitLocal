@@ -1,0 +1,110 @@
+{
+    "pages" : [
+        // pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+        {
+            "path" : "pages/login/login",
+            "style" : {
+                "backgroundColor": "#f5f6f8",
+                "navigationBarTitleText": "登录",
+                "app-plus": {
+                }
+            }
+        },
+        {
+            "path": "pages/list_order/list_order",
+            "style": {
+                "navigationBarTitleText": "楼宇列表",
+                "enablePullDownRefresh" : false, // 不开启下拉刷新, 默认就是false
+                "onReachBottomDistance" : 50, // 页面上拉触底事件触发时距页面底部距离, 默认 50
+                "app-plus" : {
+                    "bounce" : "none" // 取消iOS回弹,避免和下拉刷新冲突 (小程序无法取消)
+                }
+            }
+        }, 
+        {
+            "path": "pages/order_process/order_process",
+            "style": {
+                "navigationBarTitleText": "楼内信息"
+            }
+        },
+        {
+            "path": "pages/client_detail/client_detail",
+            "style": {
+                "navigationBarTitleText": "客户详情"
+            }
+        },
+        {
+            "path": "pages/building_detail/building_detail",
+            "style": {
+                "navigationBarTitleText": "物业信息"
+            }
+        },
+        {
+            "path": "pages/user/user",
+            "style": {
+                "navigationBarTitleText": "我的"
+            }
+        },
+        {
+            "path": "pages/user/info/info",
+            "style": {
+              "navigationBarTitleText": "信息设置"
+            }
+        },
+        {
+            "path": "pages/bottom-nav/person/person",
+            "style": {
+              "navigationBarTitleText": "个人"
+            }
+        },
+        {
+            "path": "pages/new_client/new_client",
+            "style": {
+              "navigationBarTitleText": "新增客户"
+            }
+        },
+        {
+            "path": "pages/user/modify/modify",
+            "style": {
+              "navigationBarTitleText": "修改密码"
+            }
+        }
+    ],
+
+    "globalStyle" : {
+        "navigationBarTextStyle" : "black",
+        "navigationBarTitleText" : "Fancy World Fancy APP",
+        "navigationBarBackgroundColor" : "#F8F8F8",
+        "backgroundColor" : "#F8F8F8",
+        "mp-alipay" : {
+            "titleBarColor" : "#FFFFFF"
+        }
+    },
+
+    "tabBar" : {
+        "color" : "#7A7E83",
+        "selectedColor" : "#007AFF",
+        "borderStyle" : "black",
+        "backgroundColor" : "#F8F8F8",
+        "list" : [
+            {
+                "pagePath": "pages/list_order/list_order",
+                "text": "楼宇列表",
+                "iconPath": "static/img/home.png",
+                "selectedIconPath": "static/img/homeHL.png"
+            }, 
+//             {
+//                 "pagePath": "pages/create_order/create_order",
+//                 "text": "工单发起",
+//                 "iconPath": "static/template.png",
+//                 "selectedIconPath": "static/templateHL.png"
+//             },
+            {
+                "pagePath": "pages/bottom-nav/person/person",
+                "text": "个人",
+                "iconPath": "static/img/user.png",
+                "selectedIconPath": "static/img/userHL.png"
+            }
+        ]
+    }
+}
