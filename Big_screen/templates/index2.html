@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="/bigscreen/page1">
+    <!-- import CSS -->
+    <script src="static/echarts.js"></script>
+    <script src="static/dark.js"></script>
+    <link rel="stylesheet" href="static/element-ui.css">
+    <style type="text/css">
+
+    </style>
+</head>
+
+<body style="background-color: #000000">
+    <div id="app" style="display: flex;flex-direction:column; margin-top: 5px; ">
+        <div>
+            <div style="font-size: 3.0em; color: #FFFFFF; font-weight: bold; text-align: center;margin-top: 20px">中台实时接单受理完成情况：当日累计甩单{[total_order]}单&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;已完成受理{[total_achieve]}单</div>
+        </div>
+
+        <div id='bottom' style="margin-top: 10px; display: flex; flex-direction:row;">
+            <div  style="width: 3%;"></div>
+            <div id="paint" style="width: 45%; height:900px; margin-top: 60px;"></div>
+            <div  style="width: 4%;"></div>
+            <div id="paint2" style="width: 45%; height:900px; margin-top: 60px;"></div>
+            <div  style="width: 3%;"></div>
+        </div>
+
+
+      
+    </div>
+</body>
+<!-- import Vue before Element -->
+<script src="static/vue.js"></script>
+<!-- import JavaScript -->
+<script src="static/element-ui.js"></script>
+<script src="static/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        delimiters: ['{[', ']}'],
+        el: '#app',
+        data: function () {
+            return {
+                dialogVisible: false,
+                loading: false,
+                left_table_data: [],
+                incomplete_list: [],
+                overtime_list: [],
+                total_order:0,
+                total_achieve:0
+            }
+        },
+        // computed:{
+        //     total_order: function (){
+        //         return this.left_table_data[1][1]+this.left_table_data[1][2]+this.left_table_data[1][3]
+        //     },
+        //     total_achieve: function(){
+        //         return this.left_table_data[2][1]+this.left_table_data[2][2]+this.left_table_data[2][3]
+        //     }
+        // },
+        methods: {
+            loaddata: function () {
+                axios.get('slide_two')
+                    .then(response => {
+                        this.left_table_data = response.data.left_table_data
+                        this.incomplete_list = response.data.incomplete_list
+                        this.overtime_list = response.data.overtime_list
+                        this.total_order=response.data.total_order
+                        this.total_achieve=response.data.total_achieve
+                        this.loading = false
+                        this.show_barchart_left()
+                        this.show_barchart_right()
+                    })
+                    .catch(function (error) {
+                        this.loading = false
+                        console.log(error)
+                    });
+            },
+            show_barchart_left:function(){
+                // 绘制图表。
+                echarts.init(document.getElementById('paint'),'dark').setOption({
+                    backgroundColor: '#000000',
+                    title:{
+                        show: true,
+                        text: '中台接单受理情况',
+                        // x: 'center',
+                        textStyle: {fontSize: 25,fontWeight:'bold'}
+                    },
+                    legend: {
+                        x: 'right',
+                        // y: '4px',
+                        textStyle: {fontSize: 25,fontWeight:'bold'}
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    tooltip: {},
+                    dataset: {
+                        source: this.left_table_data
+                    },
+                    xAxis: {
+                        type: 'category',
+                        axisLabel: {fontSize: 25, color: '#FFFFFF',fontWeight:'bold'}
+                    },
+                    yAxis: {axisLabel: {fontSize: 25, color: '#FFFFFF',fontWeight:'bold'}},
+                    // Declare several bar series, each will be mapped
+                    // to a column of dataset.source by default.
+                    series: [
+                        {
+                            type:'bar',
+                            label: {
+                                show: true,
+                                position: 'top',
+                                fontSize: 25,
+                                fontWeight:'bold',
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },
+                            },
+                            itemStyle:{  
+                                normal:{   
+                                    color:'#FF0000'    
+                                 }  
+                            },
+                        },
+                        {
+                            type:'bar',
+                            label: {
+                                show: true,
+                                position: 'top',
+                                fontSize: 25,
+                                fontWeight:'bold',
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },
+                            },
+                            itemStyle:{  
+                                normal:{   
+                                    color:'#0000FF'    
+                                 }  
+                            },
+                        },
+                        {
+                            type:'bar',
+                            label: {
+                                show: true,
+                                position: 'top',
+                                fontSize: 25,
+                                fontWeight:'bold',
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },
+                            },
+                            // itemStyle:{  
+                            //     normal:{   
+                            //         color:'#FF0000'    
+                            //      }  
+                            // },
+                        }
+                    ]
+                    
+                });                
+            },
+            show_barchart_right:function(){
+                // 绘制图表。
+                echarts.init(document.getElementById('paint2'),'dark').setOption({
+                    backgroundColor: '#000000',
+                    title:{
+                        show: true,
+                        text: '中台工单超时情况',
+                        textStyle: {fontSize: 25,fontWeight:'bold'}
+                    },
+                    tooltip : {
+                        trigger: 'axis',
+                        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                        }
+                    },
+                    legend: {
+                        data:['已超时','未超时'],
+                        x: 'right',
+                        textStyle: {fontSize: 25,fontWeight:'bold'},
+                        // top: '880',
+                        containLabel : true
+                        // padding: [10, 10]
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis : [
+                        {
+                            type : 'category',
+                            position: 'bottom',
+                            data : ['非时效','时效','非时效','时效','非时效','时效'],
+                            axisTick:{
+                               show:true,
+                               length:20,
+                               lineStyle:{
+                                   type:'dotted'
+                               }
+                            },
+                            axisLabel: {fontSize: 25, color: '#FFFFFF',fontWeight:'bold'}
+                        },
+                        {
+                            type : 'category',
+                            position: 'bottom',
+                            offset:30,
+                            data : ['营业厅','社区专营店','商客公话'],
+                            axisLabel: {fontSize: 25, color: '#FFFFFF',fontWeight:'bold'}
+                        }
+                    ],
+                    yAxis : [
+                        {
+                            type : 'value',
+                            axisLabel: {fontSize: 25, color: '#FFFFFF',fontWeight:'bold'}
+                        }
+                    ],
+                    series : [
+                        {
+                            name:'已超时',
+                            type:'bar',
+                            stack: '总量',
+                            label: {
+                                show: true,
+                                position: 'inside',
+                                fontSize: 25,
+                                fontWeight:'bold',
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },
+                            },
+                            data:this.overtime_list,
+                            itemStyle:{  
+                                normal:{   
+                                    color:'#FF0000'    
+                                 }  
+                            },
+                        },
+                        {
+                            name:'未超时',
+                            type:'bar',
+                            stack: '总量',
+                            label: {
+                                show: true,
+                                position: 'inside',
+                                fontSize: 25,
+                                fontWeight:'bold',
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },
+                            },
+                            data:this.incomplete_list,
+                            itemStyle:{  
+                                normal:{   
+                                    color:'#0000FF'    
+                                 }  
+                            },
+                        }
+                    ]
+                    
+                });                
+            }
+        },
+        mounted() {
+            this.loading = true
+            this.loaddata()
+            // this.show_barchart()
+            window.setInterval("vm.loaddata()",1000*60*5);
+        },
+    })
+</script>
+
+</html>

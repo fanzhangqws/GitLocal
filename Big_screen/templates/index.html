@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <base href="/bigscreen/page1">
+    <!-- import CSS -->
+    <script src="static/echarts.js"></script>
+    <script src="static/dark.js"></script>
+    <link rel="stylesheet" href="static/element-ui.css">
+    <style type="text/css">
+        #tbl1  th{
+            text-align: center;
+            color: #eeeeee;
+            /*font-size: 1.5em;*/
+            background-color: #dd6b66;
+            border-bottom: 1px solid #917213;
+            border-left: 1px solid #917213;
+            border-right: 1px solid #917213;
+            border-top: 1px solid #917213;
+        }
+        #tbl1 td {
+            text-align: center;
+            color: #eeeeee;
+            /*font-size: 1.5em;*/
+            border-bottom: 1px solid #917213;
+            border-left: 1px solid #917213;
+            border-right: 1px solid #917213;
+            border-top: 1px solid #917213;
+            
+        }
+    </style>
+</head>
+
+<body style="background-color: rgba(51,51,51,1)">
+    <div id="app" style="display: flex;flex-direction:row; margin-top: 5px; ">
+        <!-- <div style="width: 1%;"></div> -->
+        <div id="left" style="width: 66%;">
+            <div style="font-size: 3em; color: #eeeeee; font-weight: bold; text-align: center;">智慧中台实时受理播报---<span style="font-size: 0.5em;color: #eeeeee; font-weight: bold;">实时受理积分完成情况</span></div>
+            <div id="paint" style="height:900px; margin-top: 60px"></div>
+        </div>
+        <div  style="width: 1%;"></div>
+        <div id="right" style="width: 31%;">
+            <div style="font-size: 2.5em; color: #eeeeee; font-weight: bold; text-align: center;">{[group_name]}当日接单{[total_order]}单，完成受理积分值：{[total_point]}分</div>
+            <div style="width: 100%; position: center; margin-top: 30px">
+                <table id="tbl1" class="table table-bordered table-striped table-hover text-center" highlight-current-row=true>
+                    <thead>
+                        <tr>
+                            <th style="height: 40px">人员</th>
+                            <th>复杂业务受理量</th>
+                            <th>中等业务受理量</th>
+                            <th>简单业务受理量</th>
+                            <th>折合积分值</th>
+                            <th>总受理量</th>
+                        </tr>
+                    </thead>
+                    <tbody style="background-color: #ea7e53">
+                        <tr v-for="(item, index) in list_table">
+                            <td :style="{height: th_height + 'px' }" v-html='item.t0'></td>
+                            <td v-html='item.t1'></td>
+                            <td v-html='item.t2'></td>
+                            <td v-html='item.t3'></td>
+                            <td v-html='item.t4'></td>
+                            <td v-html='item.t5'></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div  style="width: 2%;"></div>        
+    </div>
+</body>
+<!-- import Vue before Element -->
+<script src="static/vue.js"></script>
+<!-- import JavaScript -->
+<script src="static/element-ui.js"></script>
+<script src="static/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        delimiters: ['{[', ']}'],
+        el: '#app',
+        data: function () {
+            return {
+                dialogVisible: false,
+                loading: false,
+                cum_achieve: [],
+                cum_diff: [],
+                cum_addition: [],
+                people_list:[],
+                achieve_percent:[],
+                list_table:[],
+                group_name:'',
+                total_point:0,
+                total_order:0,
+                th_height:0
+            }
+        },
+        // computed:{
+        //     th_height: function(){
+        //         console.log(800/this.list_table.length)
+        //         return 800/this.list_table.length
+        //     }
+        // },
+        methods: {
+            loaddata: function () {
+                axios.get('slide_one')
+                    .then(response => {
+                        this.cum_achieve = response.data.querys[1]
+                        this.cum_diff = response.data.querys[2]
+                        this.cum_addition = response.data.querys[3]
+                        this.people_list = response.data.querys[0]
+                        this.achieve_percent=response.data.querys[4]
+                        this.list_table = response.data.list_data
+                        this.total_order=response.data.total_order
+                        this.total_point=response.data.total_point
+                        this.group_name = response.data.group_name
+                        this.th_height = 730/this.list_table.length
+                        console.log(this.th_height)
+                        this.loading = false
+                        this.show_barchart()
+                    })
+                    .catch(function (error) {
+                        this.loading = false
+                        console.log(error)
+                    });
+            },
+            show_barchart:function(){
+                // console.log(this.people_list)
+                // 绘制图表。
+                echarts.init(document.getElementById('paint'),'dark').setOption({
+                    // backgroundColor: '#121f26',
+                    // backgroundColor: 'rgba(0,0,0,0)',
+                    title:{
+                        show: true,
+                        text: this.group_name+'实时受理积分情况',
+                        x: 'center'
+                    },
+                    tooltip : {
+                        trigger: 'axis',
+                        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+
+                        }
+                    },
+                    legend: {
+                        data: ['累计完成', '累计差异','超额'],
+                        y: 'bottom',
+                        textStyle: {fontSize: 20}
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis:  {
+                        type: 'value',
+                        axisLabel: {fontSize: 20}
+                    },
+                    yAxis: [
+                        {
+                            type: 'category',
+                            position: 'left',
+                            data: this.people_list,
+                            axisLabel: {fontSize: 20}
+                        },
+                        {   
+                            name: '日完成进度',
+                            namelocation: 'start',
+                            type: 'category',
+                            position:'right',
+                            data: this.achieve_percent,
+                            axisLabel: {fontSize: 20},
+                            nameTextStyle: {fontSize: 20}
+                        }
+                    ],
+                    series: [
+                        {
+                            name: '累计完成',
+                            type: 'bar',
+                            stack: '总量',
+                            label: {
+                                show: true,
+                                position: 'insideLeft',
+                                fontSize: 20,
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },
+                            },
+                            data: this.cum_achieve,
+                        },
+                        {
+                            name: '累计差异',
+                            type: 'bar',
+                            stack: '总量',
+                            label: {
+                                show: true,
+                                position: 'inside',
+                                fontSize: 20,
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },
+                            },
+                            data: this.cum_diff
+                        },
+                        {
+                            name: '超额',
+                            type: 'bar',
+                            stack: '总量',
+                            label: {
+                                show: true,
+                                position: 'right',
+                                fontSize: 20,
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },                               
+                            },
+                            data: this.cum_addition
+                        }
+                    ]
+                });                
+            }
+        },
+        mounted() {
+            this.loading = true
+            this.loaddata()
+            // this.show_barchart()
+            window.setInterval("vm.loaddata()",1000*60*10);
+
+        },
+    })
+</script>
+
+</html>

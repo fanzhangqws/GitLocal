@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <base href="/bigscreen/page1">
+    <!-- import CSS -->
+    <script src="static/echarts.js"></script>
+    <link rel="stylesheet" href="static/element-ui.css">
+    <style type="text/css">
+
+    </style>
+</head>
+
+<body>
+    <div id="app" style="display: flex;flex-direction:column; margin-top: 5px; ">
+        <el-upload
+            class="upload-demo"
+            :on-preview="handlePreview"
+            :on-remove="handleRemove"
+            :before-remove="beforeRemove"
+            :limit="1"
+            :on-exceed="handleExceed"
+            :file-list="fileList"
+
+            :action="importFileUrl"
+            name="importfile"
+            :on-error="uploadError"
+            :on-success="uploadSuccess"
+            :before-upload="beforeAvatarUpload">
+            <el-button round type="primary">上传<i class="el-icon-upload el-icon--right"></i></el-button>
+            <div class="el-upload__tip">只能上传xls/xlsx文件，且不超过10Mb</div>
+        </el-upload>      
+    </div>
+</body>
+<!-- import Vue before Element -->
+<script src="static/vue.js"></script>
+<!-- import JavaScript -->
+<script src="static/element-ui.js"></script>
+<script src="static/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        delimiters: ['{[', ']}'],
+        el: '#app',
+        data: function () {
+            return {
+                importFileUrl: 'input_data',
+                fileList: [],
+                loading: false,
+            }
+        },
+        methods: {
+              handleRemove(file, fileList) {
+                  console.log(file, fileList);
+              },
+              handlePreview(file) {
+                  console.log(file);
+              },
+              handleExceed(files, fileList) {
+                  this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+              },
+              beforeRemove(file, fileList) {
+                  return this.$confirm(`确定移除 ${ file.name }？`);
+              },
+              // 上传成功后的回调
+              uploadSuccess (response, file, fileList) {
+                this.$alert(response.errmsg, '提示', {
+                  confirmButtonText: '确定'
+                  })  
+              },
+              // 上传错误
+              uploadError (response, file, fileList) {
+                console.log('上传失败，请重试！')
+                this.$alert(response.errmsg, '提示', {
+                  confirmButtonText: '确定'
+                  }) 
+              },
+              // 上传前对文件的大小的判断
+              beforeAvatarUpload (file) {
+                  const extension = file.name.split('.')[1] === 'xls'
+                  const extension2 = file.name.split('.')[1] === 'xlsx'
+                  const isLt2M = file.size / 1024 / 1024 < 10
+                  if (!extension && !extension2) {
+                      console.log('上传模板只能是 xls、xlsx 格式!')
+                  }
+                  if (!isLt2M) {
+                      console.log('上传模板大小不能超过 10MB!')
+                  }
+                  return extension || extension2 && isLt2M
+              }
+        },
+        mounted() {
+            this.loading = true
+        },
+    })
+</script>
+
+</html>
