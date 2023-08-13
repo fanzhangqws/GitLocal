@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <base href="/bigscreen_kj/page1">
+    <!-- import CSS -->
+    <script src="static/echarts.js"></script>
+    <script src="static/dark.js"></script>
+    <link rel="stylesheet" href="static/element-ui.css">
+    <style type="text/css">
+    </style>
+</head>
+
+<body style="background-image: url(static/image1.jpeg); background-repeat:no-repeat;
+                background-size:100% 100%;">
+    <div id="app" style="display: flex;flex-direction:column;">
+        <div id="top" style="display: flex;flex-direction:row; margin-top: 30px;">
+            <div style="width: 2%;"></div>
+            <div id="left" style="width: 47%;">
+                <div style="font-size: 3em; color: #6AE7FF; font-weight: bold; text-align: left;">营销快报&nbsp;&nbsp;&nbsp;<span style="font-size: 0.8em; color: #6AE7FF; font-weight: bold; text-align: left;">截止{[part1[0]]}年{[part1[1]]}月{[part1[2]]}日{[part1[3]]}时{[part1[4]]}分</span></div>
+                <div style="display: flex;flex-direction:row;margin-top: 40px">
+                    <div style="font-size: 2em; color: #6AE7FF; font-weight: bold; text-align: left;">执行工单量：{[part1[5]]}</div>
+                    <div style="width: 25%;"></div>
+                    <div style="font-size: 2em; color: #6AE7FF; font-weight: bold; text-align: left;">呼通工单量: {[part1[6]]}</div>
+                </div>
+                <div style="display: flex;flex-direction:row;margin-top: 40px">
+                    <div style="font-size: 2em; color: #6AE7FF; font-weight: bold; text-align: left;">有效外呼量：{[part1[7]]}</div>
+                    <div style="width: 25%;"></div>
+                    <div style="font-size: 2em; color: #6AE7FF; font-weight: bold; text-align: left;">营销成功量: {[part1[8]]}</div>
+                </div>
+                <div style="font-size: 2em; color: #6AE7FF; font-weight: bold; text-align: left;margin-top: 40px">受理成功量：{[part1[9]]}</div>
+            </div>
+            <div style="width: 2%;"></div>
+            <div id="right" style="width: 47%;">
+                <div style="font-size: 3em; color: #6AE7FF; font-weight: bold; text-align: center;">外呼人员参与度</div>
+                <div style="display: flex;flex-direction:row;">
+                    <div id="paint1" style="width: 50%;height:350px; margin-top: 10px"></div>
+                    <div id="paint2" style="width: 50%;height:350px; margin-top: 10px"></div>
+                </div>
+            </div>
+            <div  style="width: 2%;"></div>            
+        </div>
+        <div id="bottom" style="display: flex;flex-direction:row;">
+            <div style="width: 2%;"></div>
+            <div id="left" style="width: 47%;">
+                <div style="font-size: 3em; color: #6AE7FF; font-weight: bold; text-align: left;">工单执行总量</div>
+                <div id="paint3" style="height:500px"></div>
+            </div>
+            <div style="width: 2%;"></div>
+            <div id="right" style="width: 47%;">
+                <div style="font-size: 3em; color: #6AE7FF; font-weight: bold; text-align: center;">营销成功及受理量</div>
+                <div id="paint4" style="width: 100%;height:500px; margin-top: 20px"></div>
+            </div>
+            <div style="width: 2%;"></div>
+        </div>        
+    </div>
+</body>
+<!-- import Vue before Element -->
+<script src="static/vue.js"></script>
+<!-- import JavaScript -->
+<script src="static/element-ui.js"></script>
+<script src="static/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        delimiters: ['{[', ']}'],
+        el: '#app',
+        data: function () {
+            return {
+                dialogVisible: false,
+                loading: false,
+                part1: [],
+                part2: [],
+                part3: [],
+                part4: [],
+                th_height:0
+            }
+        },
+        methods: {
+            loaddata: function () {
+                axios.get('slide_one')
+                    .then(response => {
+                        this.part1 = response.data.part1
+                        this.part2 = response.data.part2
+                        this.part3 = response.data.part3
+                        this.part4 = response.data.part4
+                        // this.th_height = 730/this.list_table.length
+                        console.log(this.part2)
+                        this.loading = false
+                        this.show_barchart1()
+                        this.show_barchart2()
+                        this.show_barchart3()
+                        this.show_barchart4()
+                    })
+                    .catch(function (error) {
+                        this.loading = false
+                        console.log(error)
+                    });
+            },
+            show_barchart1:function(){
+                // console.log(this.people_list)
+                // 绘制图表。
+                echarts.init(document.getElementById('paint1'),'dark').setOption({
+                    backgroundColor:'', //设置无背景色
+                    // backgroundColor: 'rgba(0,0,0,0)',
+                    title: {
+                        text: '客经营销一部',
+                        x: 'center',
+                        textStyle: {color: '#6AE7FF'}
+                    },
+                    tooltip : {
+                        formatter: "{a} <br/>{b} : {c}%"
+                    },
+                    toolbox: {
+                        feature: {
+                            restore: {},
+                            saveAsImage: {}
+                        }
+                    },
+                    series: [
+                        {
+                            name: '业务指标',
+                            type: 'gauge',
+                            detail: {formatter:'{value}%'},
+                            data: [{value: this.part2[0], name: '完成率'}]
+                        }
+                    ]
+                });                
+            },
+            show_barchart2:function(){
+                // console.log(this.people_list)
+                // 绘制图表。
+                echarts.init(document.getElementById('paint2'),'dark').setOption({
+                    backgroundColor:'', //设置无背景色
+                    // backgroundColor: 'rgba(0,0,0,0)',
+                    title: {
+                        text: '客经营销二部',
+                        x: 'center',
+                        textStyle: {color: '#6AE7FF'}
+                    },
+                    tooltip : {
+                        formatter: "{a} <br/>{b} : {c}%"
+                    },
+                    toolbox: {
+                        feature: {
+                            restore: {},
+                            saveAsImage: {}
+                        }
+                    },
+                    series: [
+                        {
+                            name: '业务指标',
+                            type: 'gauge',
+                            detail: {formatter:'{value}%'},
+                            data: [{value: this.part2[1], name: '完成率'}]
+                        }
+                    ]
+                });                
+            },
+            show_barchart3:function(){
+                // console.log(this.people_list)
+                // 绘制图表。
+                echarts.init(document.getElementById('paint3'),'dark').setOption({
+                    backgroundColor:'', //设置无背景色
+                    // backgroundColor: 'rgba(0,0,0,0)',
+                    // title:{
+                    //     show: true,
+                    //     text: this.group_name+'实时受理积分情况',
+                    //     x: 'center'
+                    // },
+                    xAxis: {
+                        type: 'category',
+                        data: this.part3[0],
+                        axisLabel: {fontSize: 23,rotate:30, color: '#6AE7FF'},
+                        nameTextStyle: {fontSize: 23},
+                        splitLine:{
+                           show:false     //去掉网格线
+                        }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        show: false,
+                        axisLabel: {fontSize: 23, color: '#6AE7FF'},
+                        nameTextStyle: {fontSize: 23},
+                        splitLine:{
+                           show:false     //去掉网格线
+                        }
+                    },
+                    series: [{
+                        data: this.part3[1],
+                        type: 'line',
+                        label: {
+                            show: true,
+                            position: 'top',
+                            fontSize: 23,
+                            color: '#6AE7FF',
+                            fontWeight: 'bold',
+                            formatter: function(obj) {
+                                if(obj.value == 0) {
+                                    return '';
+                                }
+                            },
+                        },
+                        itemStyle:{  
+                            normal:{  
+                                // color:'#0000FF',
+                                lineStyle:{    
+                                    color:'#5B9BE7',
+                                    width:4// 0.1的线条是非常细的了    
+                                }    
+                            }  
+                        },
+                    }]
+                });                
+            },
+            show_barchart4:function(){
+                // 绘制图表。
+                echarts.init(document.getElementById('paint4'),'dark').setOption({
+                    backgroundColor:'', //设置无背景色
+                    // title: {
+                    //     text: '非时效性工单超时预警趋势图',
+                    //     x: 'center'
+                    // },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'cross',
+                            label: {
+                                backgroundColor: '#283b56'
+                            }
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    legend: {
+                        data:['受理成功量', '营销成功量'],
+                        y: 'top',
+                        textStyle: {fontSize: 23}
+                    },
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            dataView: {readOnly: false},
+                            restore: {},
+                            saveAsImage: {}
+                        }
+                    },
+                    dataZoom: {
+                        show: false,
+                        start: 0,
+                        end: 100
+                    },
+                    xAxis: [
+                        {
+                            type: 'category',
+                            data: this.part4[0],
+                            axisLabel: {fontSize: 23,rotate:30, color: '#6AE7FF'},
+                            nameTextStyle: {fontSize: 23, color: '#6AE7FF'},
+                            splitLine:{
+                               show:false     //去掉网格线
+                            }
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value',
+                            show: false,
+                            position: 'left',
+                            name: '受理成功量',
+                            axisLabel: {fontSize: 23, color: '#6AE7FF'},
+                            nameTextStyle: {fontSize: 23, color: '#6AE7FF'},
+                            splitLine:{
+                               show:false     //去掉网格线
+                            }
+                        },
+                        {
+                            type: 'value',
+                            show: false,
+                            position: 'right',
+                            name: '营销成功量',
+                            axisLabel: {fontSize: 23, color: '#6AE7FF'},
+                            nameTextStyle: {fontSize: 23, color: '#6AE7FF'},
+                            splitLine:{
+                               show:false     //去掉网格线
+                            }           
+                            // max: 150,
+                            // min: 0
+                        }
+                    ],
+                    series: [
+                        {
+                            name:'受理成功量',
+                            type:'bar',
+                            xAxisIndex: 0,
+                            yAxisIndex: 0,
+                            data:this.part4[2],
+                            label: {
+                                show: true,
+                                position: 'inside',
+                                fontSize: 23,
+                                fontWeight: 'bold',
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },
+                            },
+                            itemStyle:{  
+                                normal:{  
+                                    color:'#2782C0',    
+                                }  
+                            },
+                        },
+                        {
+                            name:'营销成功量',
+                            type:'line',
+                            xAxisIndex: 0,
+                            yAxisIndex: 1,
+                            data:this.part4[1],
+                            label: {
+                                show: true,
+                                position: 'top',
+                                fontSize: 23,
+                                // color: '#6AE7FF',
+                                fontWeight: 'bold',
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },
+                            },
+                            itemStyle:{  
+                                normal:{  
+                                    color:'#6AE7FF',
+                                    lineStyle:{    
+                                        color:'#5B9BE7',
+                                        width:4// 0.1的线条是非常细的了    
+                                    }    
+                                }  
+                            },
+                        }
+                    ]                    
+                });                
+            },
+        },
+        mounted() {
+            this.loading = true
+            this.loaddata()
+            // // this.show_barchart()
+            window.setInterval("vm.loaddata()",1000*60*5);
+
+        },
+    })
+</script>
+
+</html>

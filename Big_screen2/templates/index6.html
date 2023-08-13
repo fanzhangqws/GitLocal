@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <base href="/bigscreen_kj/page0">
+    <!-- import CSS -->
+    <script src="static/echarts.js"></script>
+    <script src="static/dark.js"></script>
+    <link rel="stylesheet" href="static/element-ui.css">
+    <style type="text/css">
+    </style>
+</head>
+
+<body style="background-image: url(static/image2.jpg); background-repeat:no-repeat;
+                background-size:100% 100%; height: 1050px">
+    <div id="app" style="display: flex;flex-direction:column;">
+        <div style="margin-top: 710px; margin-left: 170px; text-align: center; font-size: 10em; color: white; font-weight: bold;">
+            {[part1]}
+        </div>
+    </div>
+</body>
+<!-- import Vue before Element -->
+<script src="static/vue.js"></script>
+<!-- import JavaScript -->
+<script src="static/element-ui.js"></script>
+<script src="static/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        delimiters: ['{[', ']}'],
+        el: '#app',
+        data: function () {
+            return {
+                dialogVisible: false,
+                loading: false,
+                part1: 0
+            }
+        },
+        methods: {
+            loaddata: function () {
+                axios.get('slide_zero')
+                    .then(response => {
+                        this.part1 = response.data.result
+                        this.loading = false
+                    })
+                    .catch(function (error) {
+                        this.loading = false
+                        console.log(error)
+                    });
+            },
+        },
+        mounted() {
+            this.loading = true
+            this.loaddata()
+            // // this.show_barchart()
+            window.setInterval("vm.loaddata()",1000*60*60);
+
+        },
+    })
+</script>
+
+</html>

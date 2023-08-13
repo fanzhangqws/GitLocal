@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="/bigscreen_kj/page4">
+    <!-- import CSS -->
+    <script src="static/echarts.js"></script>
+    <script src="static/dark.js"></script>
+    <link rel="stylesheet" href="static/element-ui.css">
+    <style type="text/css">
+        #tbl1  th{
+            text-align: center;
+            color: #6AE7FF;
+            font-size: 2em;
+            font-weight: bold;
+            /*background-color: #dd6b66;*/
+        }
+        #tbl1 td {
+            text-align: center;
+            color: #6AE7FF;
+            font-size: 2em;
+            font-weight: bold;         
+        }
+    </style>
+</head>
+
+<body style="background-image: url(static/image1.jpeg); background-repeat:no-repeat;
+                background-size:100% 100%;">
+    <div id="app" style="display: flex;flex-direction:column; margin-top: 35px; ">
+        <div id='top' style="height:70px; display: flex; flex-direction:row;">
+            <div id="left" style="width: 100%;">
+                <div style="font-size: 2.2em; color: #eeeeee; font-weight: bold; text-align: center; background-color: #5B9BE7">截止{[top_table_data[0]]}:{[top_table_data[1]]}分,当日执行工单{[top_table_data[2]]},呼通工单{[top_table_data[3]]},接通率{[top_table_data[4]]}%,有效外呼工单{[top_table_data[5]]},营销成功率{[top_table_data[6]]}%,受理成功数{[top_table_data[7]]}</div>
+            </div>              
+        </div>
+
+        <div id='bottom' style="margin-top: 30px; display: flex; flex-direction:row;">
+            <div  style="width: 3%;"></div>
+            <div id="paint" style="width: 45%; height:900px;"></div>
+            <div style="width: 4%;"></div>
+            <div style="width: 45%; height:900px;">
+                <div style="font-size: 2.5em; color: #6AE7FF; font-weight: bold; text-align: center;">个人有效接话排行 </div>
+                <div style="width: 100%; position: center; margin-top: 30px">
+                    <table id="tbl1" class="table  table-hover text-center" highlight-current-row=true style="width: 100%; position: center;">
+                        <thead>
+                            <tr>
+                                <th>外呼人员</th>
+                                <th>外呼班组</th>
+                                <th>外呼呼通量</th>
+                                <th>有效外呼量</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item, index) in right_table_data">
+                                <td v-html='item[0]'></td>
+                                <td v-html='item[1]'></td>
+                                <td v-html='item[2]'></td>
+                                <td v-html='item[3]'></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div  style="width: 3%;"></div>
+        </div>      
+    </div>
+</body>
+<!-- import Vue before Element -->
+<script src="static/vue.js"></script>
+<!-- import JavaScript -->
+<script src="static/element-ui.js"></script>
+<script src="static/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        delimiters: ['{[', ']}'],
+        el: '#app',
+        data: function () {
+            return {
+                dialogVisible: false,
+                loading: false,
+                left_table_data: [],
+                right_table_data: [],
+                top_table_data: [],
+            }
+        },
+        methods: {
+            loaddata: function () {
+                axios.get('slide_four')
+                    .then(response => {
+                        this.left_table_data = response.data.left_table_data
+                        this.right_table_data = response.data.right_table_data
+                        this.top_table_data = response.data.top_table_data
+                        // console.log(this.right_table_data)
+                        this.loading = false
+                        this.show_barchart_left()
+                    })
+                    .catch(function (error) {
+                        this.loading = false
+                        console.log(error)
+                    });
+            },
+            show_barchart_left:function(){
+                // 绘制图表。
+                echarts.init(document.getElementById('paint'),'dark').setOption({
+                    backgroundColor: '',
+                    title:{
+                        show: true,
+                        text: '坐席接话监控日报',
+                        x: 'left',
+                        textStyle: {fontSize: 25,color: '#6AE7FF'}
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+                    legend: {
+                        data: ['签入人数', '接话人数', '空闲人数', '临休人数'],
+                        x: 'right',
+                        y: 'top',
+                        textStyle: {fontSize: 20,color: '#6AE7FF'}
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        show: true,
+                        orient: 'vertical',
+                        left: 'right',
+                        top: 'center',
+                    },
+                    calculable: true,
+                    xAxis: [
+                        {
+                            type: 'category',
+                            axisTick: {show: false},
+                            data: this.left_table_data[0],
+                            axisLabel: {fontSize: 20,rotate:30,color: '#6AE7FF'},
+                            nameTextStyle: {fontSize: 20},
+                            splitLine:{
+                               show:false     //去掉网格线
+                            }
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value',
+                            show:false,
+                            position: 'left',
+                            // name: '受理成功量',
+                            axisLabel: {fontSize: 20,color: '#6AE7FF'},
+                            nameTextStyle: {fontSize: 20},
+                            splitLine:{
+                               show:false     //去掉网格线
+                            }
+                        },
+                    ],
+                    series: [
+                        {
+                            name: '签入人数',
+                            type: 'bar',
+                            xAxisIndex: 0,
+                            yAxisIndex: 0,
+                            barGap: 0,
+                            label: {
+                                show: true,
+                                position: 'top',
+                                fontSize: 20,
+                                fontWeight: 'bold',
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },
+                            },
+                            data: this.left_table_data[1],
+                            itemStyle:{  
+                                normal:{  
+                                    color:'#85A6EF',    
+                                }  
+                            },
+                        },
+                        {
+                            name: '接话人数',
+                            type: 'bar',
+                            xAxisIndex: 0,
+                            yAxisIndex: 0,
+                            label: {
+                                show: true,
+                                position: 'top',
+                                fontSize: 20,
+                                fontWeight: 'bold',
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },
+                            },
+                            data: this.left_table_data[2],
+                            itemStyle:{  
+                                normal:{  
+                                    color:'#6AE7FF',    
+                                }  
+                            },
+                        },
+                        {
+                            name: '空闲人数',
+                            type: 'bar',
+                            xAxisIndex: 0,
+                            yAxisIndex: 0,
+                            label: {
+                                show: true,
+                                position: 'top',
+                                fontSize: 20,
+                                fontWeight: 'bold',
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },
+                            },
+                            data: this.left_table_data[3],
+                            itemStyle:{  
+                                normal:{  
+                                    color:'#FFC000',    
+                                }  
+                            },
+                        },
+                        {
+                            name: '临休人数',
+                            type: 'bar',
+                            xAxisIndex: 0,
+                            yAxisIndex: 0,
+                            label: {
+                                show: true,
+                                position: 'top',
+                                fontSize: 20,
+                                fontWeight: 'bold',
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },
+                            },
+                            data: this.left_table_data[4],
+                            itemStyle:{  
+                                normal:{  
+                                    color:'#ED7D31',    
+                                }  
+                            },
+                        },
+                    ]                    
+                });                
+            },
+        },
+        mounted() {
+            this.loading = true
+            this.loaddata()
+            // this.show_barchart()
+            window.setInterval("vm.loaddata()",1000*60*5);
+        },
+    })
+</script>
+
+</html>

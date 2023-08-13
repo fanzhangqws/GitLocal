@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <base href="/bigscreen_kj/main">
+    <!-- import CSS -->
+    <script src="static/echarts.js"></script>
+    <link rel="stylesheet" href="static/element-ui.css">
+    <style>
+        iframe {
+            margin:0;
+            padding: 0;
+            width: 100%;
+            height:100%;
+        }
+        body {
+            margin:0;
+        }
+    </style>
+</head>
+
+<body> 
+    <div id="app" >
+        <div>
+            <el-carousel style="padding: 0" height=1070px autoplay="true" interval=60000>
+                <el-carousel-item :key="0">
+                    <iframe src="http://127.0.0.1:8000/bigscreen_kj/page01?image_key=image2"></iframe>
+                </el-carousel-item>
+                <el-carousel-item :key="1">
+                    <iframe src="http://127.0.0.1:8000/bigscreen_kj/page01?image_key=image3"></iframe>
+                </el-carousel-item>
+                <el-carousel-item :key="2">
+                    <iframe src="http://127.0.0.1:8000/bigscreen_kj/page01?image_key=image4"></iframe>
+                </el-carousel-item>
+                <el-carousel-item :key="3">
+                    <iframe src="http://127.0.0.1:8000/bigscreen_kj/page01?image_key=image5"></iframe>
+                </el-carousel-item>
+                <el-carousel-item :key="4">
+                    <iframe src="http://127.0.0.1:8000/bigscreen_kj/page01?image_key=image6"></iframe>
+                </el-carousel-item>
+                <el-carousel-item :key="5">
+                    <iframe src="http://127.0.0.1:8000/bigscreen_kj/page1"></iframe>
+                </el-carousel-item>
+                <el-carousel-item :key="6">
+                    <iframe src="http://127.0.0.1:8000/bigscreen_kj/page2"></iframe>
+                </el-carousel-item>
+                <el-carousel-item :key="7">
+                    <iframe src="http://127.0.0.1:8000/bigscreen_kj/page3"></iframe>
+                </el-carousel-item>
+                <el-carousel-item :key="8">
+                    <iframe src="http://127.0.0.1:8000/bigscreen_kj/page4"></iframe>
+                </el-carousel-item>
+                <el-carousel-item :key="9">
+                    <iframe src="http://127.0.0.1:8000/bigscreen_kj/page5"></iframe>
+                </el-carousel-item>
+            </el-carousel>
+        </div>
+        <div style="height: 10px"></div>      
+    </div>
+</body>
+<!-- import Vue before Element -->
+<script src="static/vue.js"></script>
+<!-- import JavaScript -->
+<script src="static/element-ui.js"></script>
+<script src="static/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        delimiters: ['{[', ']}'],
+        el: '#app',
+        data: function () {
+            return {
+            }
+        },
+        methods: {
+        },
+        mounted() {
+        },
+    })
+</script>
+
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="/bigscreen_kj/page5">
+    <!-- import CSS -->
+    <script src="static/echarts.js"></script>
+    <script src="static/dark.js"></script>
+    <link rel="stylesheet" href="static/element-ui.css">
+    <style type="text/css">
+        #tbl1  th{
+            text-align: center;
+            color: #6AE7FF;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        #tbl1 td {
+            text-align: center;
+            color: #6AE7FF;
+            font-size: 1.5em;
+            font-weight: bold;          
+        }
+    </style>
+</head>
+
+<body style="background-image: url(static/image1.jpeg); background-repeat:no-repeat;
+                background-size:100% 100%;">
+    <div id="app" style="display: flex;flex-direction:column; margin-top: 35px; ">
+        <div id='top' style="height:70px; display: flex; flex-direction:row;">
+            <div id="left" style="width: 100%;">
+                <div style="font-size: 2.2em; color: #eeeeee; font-weight: bold; text-align: center; background-color: #5B9BE7">截止{[top_table_data[0]]}:{[top_table_data[1]]}分,当日执行工单{[top_table_data[2]]},呼通工单{[top_table_data[3]]},接通率{[top_table_data[4]]}%,有效外呼工单{[top_table_data[5]]},营销成功率{[top_table_data[6]]}%,受理成功数{[top_table_data[7]]}</div>
+            </div>              
+        </div>
+
+        <div id='bottom' style="margin-top: 30px; display: flex; flex-direction:row;">
+            <div style="width: 3%;"></div>
+            <div id="paint" style="width: 45%; height:900px;"></div>
+            <div style="width: 4%;"></div>
+            <div style="width: 45%; height:900px;">
+                <div style="font-size: 2.5em; color: #6AE7FF; font-weight: bold; text-align: center;">业务受理个人排行榜</div>
+                <div style="width: 100%; position: center; height:400px; margin-top: 30px">
+                    <table id="tbl1" class="table table-hover text-center" highlight-current-row=true style="width: 100%; position: center;">
+                        <thead>
+                            <tr>
+                                <th>受理人员</th>
+                                <th>受理工单数</th>
+                                <th>驳回工单数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item, index) in right_table_data">
+                                <td v-html='item[0]'></td>
+                                <td v-html='item[1]'></td>
+                                <td v-html='item[2]'></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="paint2" style="height:400px;">haha </div>
+            </div>
+            <div style="width: 3%;"></div>
+        </div>      
+    </div>
+</body>
+<!-- import Vue before Element -->
+<script src="static/vue.js"></script>
+<!-- import JavaScript -->
+<script src="static/element-ui.js"></script>
+<script src="static/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        delimiters: ['{[', ']}'],
+        el: '#app',
+        data: function () {
+            return {
+                dialogVisible: false,
+                loading: false,
+                left_table_data: [],
+                right_table_data: [],
+                top_table_data: [],
+                right_bot_data:[]
+            }
+        },
+        methods: {
+            loaddata: function () {
+                axios.get('slide_five')
+                    .then(response => {
+                        this.left_table_data = response.data.left_table_data
+                        this.right_table_data = response.data.right_table_data
+                        this.top_table_data = response.data.top_table_data
+                        this.right_bot_data=response.data.right_bot_data
+                        console.log(this.right_bot_data)
+                        this.loading = false
+                        this.show_barchart_left()
+                        this.show_barchart_right()
+                    })
+                    .catch(function (error) {
+                        this.loading = false
+                        console.log(error)
+                    });
+            },
+            show_barchart_left:function(){
+                // 绘制图表。
+                echarts.init(document.getElementById('paint'),'dark').setOption({
+                    backgroundColor: '',
+                    title: {
+                        text: '业务受理日报',
+                        textStyle: {fontSize: 25,color: '#6AE7FF'}
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+                    legend: {
+                        data: ['受理成功量'],
+                        textStyle: {fontSize: 20,color: '#6AE7FF'}
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'value',
+                        show: false,
+                        boundaryGap: [0, 0.01],
+                        axisLabel: {fontSize: 20},
+                        nameTextStyle: {fontSize: 20},
+                        splitLine:{
+                           show:false     //去掉网格线
+                        }
+                    },
+                    yAxis: {
+                        type: 'category',
+                        data: this.left_table_data[0],
+                        axisLabel: {fontSize: 20,color: '#6AE7FF'},
+                        nameTextStyle: {fontSize: 20},
+                        splitLine:{
+                           show:false     //去掉网格线
+                        }
+                    },
+                    series: [
+                        {
+                            name: '受理成功量',
+                            type: 'bar',
+                            data: this.left_table_data[1],
+                            label: {
+                                show: true,
+                                position: 'right',
+                                fontSize: 20,
+                                color: '#6AE7FF',
+                                fontWeight: 'bold',
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },
+                            },
+                            itemStyle:{  
+                                normal:{  
+                                    color:'#5B9BD5',    
+                                }  
+                            },
+                        }
+                    ]                    
+                });                
+            },
+
+            show_barchart_right:function(){
+                // 绘制图表。
+                echarts.init(document.getElementById('paint2'),'dark').setOption({
+                    backgroundColor: '',
+                    title:{
+                        show: true,
+                        text: '业务受理成功率',
+                        x: 'left',
+                        textStyle: {fontSize: 25,color: '#6AE7FF'}
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+                    legend: {
+                        data: ['累计工单数', '受理成功率'],
+                        x: 'right',
+                        y: 'top',
+                        textStyle: {fontSize: 23, color: '#6AE7FF'}
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        show: true,
+                        orient: 'vertical',
+                        left: 'right',
+                        top: 'center',
+                    },
+                    calculable: true,
+                    xAxis: [
+                        {
+                            type: 'category',
+                            axisTick: {show: false},
+                            data: this.right_bot_data[0],
+                            axisLabel: {fontSize: 20,rotate:30,color: '#6AE7FF'},
+                            nameTextStyle: {fontSize: 20},
+                            splitLine:{
+                               show:false     //去掉网格线
+                            }
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value',
+                            show: false,
+                            position: 'left',
+                            // x: 50,
+                            // name: '受理成功量',
+                            axisLabel: {fontSize: 20},
+                            nameTextStyle: {fontSize: 20},
+                            splitLine:{
+                               show:false     //去掉网格线
+                            }
+                        },
+                        {
+                            type: 'value',
+                            show: false,
+                            position: 'right',
+                            // name: '营销成功量',
+                            axisLabel: {fontSize: 20},
+                            nameTextStyle: {fontSize: 20} , 
+                            splitLine:{
+                               show:false     //去掉网格线
+                            }          
+                            // max: 150,
+                            // min: 0
+                        }
+                    ],
+                    series: [
+                        {
+                            name: '累计工单数',
+                            type: 'bar',
+                            xAxisIndex: 0,
+                            yAxisIndex: 0,
+                            barGap: 0,
+                            label: {
+                                show: true,
+                                position: 'top',
+                                fontSize: 30,
+                                color:'#6AE7FF',
+                                fontWeight: 'bold',
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    }
+                                },
+                            },
+                            data: this.right_bot_data[2],
+                            itemStyle:{  
+                                normal:{  
+                                    color:'#6AE7FF',    
+                                }  
+                            },
+                        },
+                        {
+                            name: '受理成功率',
+                            type:'line',
+                            xAxisIndex: 0,
+                            yAxisIndex: 1,
+                            label: {
+                                show: true,
+                                position: 'top',
+                                fontSize: 30,
+                                fontWeight: 'bold',
+                                formatter: function(obj) {
+                                    if(obj.value == 0) {
+                                        return '';
+                                    } else {
+                                        return obj.value+'%'
+                                    }
+                                },
+                            },
+                            data: this.right_bot_data[3],
+                            itemStyle:{  
+                                normal:{  
+                                    color:'red',
+                                    lineStyle:{    
+                                        color:'#FFC000',
+                                        width:4// 0.1的线条是非常细的了    
+                                    }    
+                                }  
+                            },
+                        }
+                    ]                    
+                });                
+            },
+        },
+        mounted() {
+            this.loading = true
+            this.loaddata()
+            // this.show_barchart()
+            window.setInterval("vm.loaddata()",1000*60*5);
+        },
+    })
+</script>
+
+</html>
