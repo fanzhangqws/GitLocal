@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <base href="/balance/">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="static/element-ui.css">
+    <link rel="stylesheet" href="static/bootstrap.css"> 
+</head>
+<style>
+  .table > tbody >tr >td {display: table-cell; vertical-align: middle; text-align: center;}
+  .table > thead >tr >th {display: table-cell; vertical-align: middle; text-align: center;}
+  .el-row {
+    margin-bottom: 20px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  .el-col {
+    border-radius: 4px;
+  }
+  .bg-purple-dark {
+    background: #99a9bf;
+  }
+  .bg-purple {
+    background: #d3dce6;
+  }
+  .bg-purple-light {
+    background: #e5e9f2;
+  }
+  .grid-content {
+    border-radius: 4px;
+    min-height: 36px;
+  }
+  .row-bg {
+    padding: 10px 0;
+    background-color: #f9fafc;
+  }
+  .el-header, .el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
+  
+  .el-aside {
+    background-color: #D3DCE6;
+    color: #333;
+    text-align: center;
+    line-height: 200px;
+  }
+  
+  .el-main {
+    background-color: #E9EEF3;
+    color: #333;
+    text-align: center;
+    line-height: 160px;
+  }
+  
+  body > .el-container {
+    margin-bottom: 40px;
+  }
+  
+  .el-container:nth-child(5) .el-aside,
+  .el-container:nth-child(6) .el-aside {
+    line-height: 260px;
+  }
+  
+  .el-container:nth-child(7) .el-aside {
+    line-height: 320px;
+  }
+
+  .demo-table-expand {
+    font-size: 0;
+  }
+  .demo-table-expand label {
+    width: 90px;
+    color: #99a9bf;
+  }
+  .demo-table-expand .el-form-item {
+    margin-right: 0;
+    margin-bottom: 0;
+    width: 50%;
+  }
+</style>
+
+<body>
+  <div id="app" align="center">
+    <el-tabs type="border-card" @tab-click="clear_cache_tab1">
+      <el-tab-pane label="查询数据" name="first">
+          <el-row>
+              <el-form ref="form" :model="form" :inline="true" >
+                  <el-form-item label="区域类型">
+                      <el-select v-model="form.region_type" filterable multiple  placeholder="请选择区域类型">
+                          <el-option v-for="item in plan_detail.region_type" :key="item" :label="item" :value="item">
+                          </el-option>
+                      </el-select>
+                  </el-form-item>
+                  <el-form-item label="渠道类型">
+                      <el-select v-model="form.channel_type" filterable multiple  placeholder="请选择渠道类型">
+                          <el-option v-for="item in plan_detail.channel_type" :key="item" :label="item" :value="item">
+                          </el-option>
+                      </el-select>
+                  </el-form-item>
+                  <el-form-item label="套餐类型">
+                      <el-select v-model="form.plan_type" filterable multiple  placeholder="请选择套餐类型">
+                          <el-option v-for="item in plan.plan_type"  :label="item" :key="item" :value="item">
+                          </el-option>
+                      </el-select>
+                  </el-form-item>
+                  <el-form-item label="手机侧类型">
+                      <el-select v-model="form.mobile_side_type" filterable multiple  placeholder="请选择手机侧类型">
+                          <el-option v-for="item in plan.mobile_side_type" :key="item" :label="item" :value="item">
+                          </el-option>
+                      </el-select>
+                  </el-form-item>
+                  <el-form-item label="套餐通用名称">
+                      <el-select v-model="form.plan_generate_name" filterable multiple  placeholder="请选择套餐通用名称">
+                          <el-option v-for="item in plan.plan_generate_name" :key="item" :label="item" :value="item">
+                          </el-option>
+                      </el-select>
+                  </el-form-item>
+                  <el-form-item>
+                      <el-button type="primary" @click="load_coase_table">查询</el-button>
+                      <el-button v-if="back_button" type="primary" @click="load_back">返回</el-button>
+                  </el-form-item>
+                  <el-form-item>
+                      <el-button v-if="sava_button" type="primary" @click="save_table">保存</el-button>
+                  </el-form-item>
+              </el-form>
+          </el-row>
+
+          <template>
+            <el-table v-if="coase_table_seen" :data="coase_table_data" border style="width: 100%" @expand-change="load_fine_table1">
+                <el-table-column type="expand">
+                  <template slot-scope="props">
+                    <table v-if="fine_table_seen" class="table table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>套餐通用名称</th>
+                                <th>一级分类</th>
+                                <th>二级分类</th>
+                                <th>三级分类</th>
+                                <th>成本支出类型</th>
+                                <th>套餐价值</th>
+                                <th>积分价值</th>                      
+                                <th>合计</th>                                
+                                <th>T0月</th>
+                                <th>T1月</th>
+                                <th>T2月</th>
+                                <th>T3月</th>
+                                <th>T4月</th>
+                                <th>T5月</th>
+                                <th>T6月</th>
+                                <th>T7月</th>
+                                <th>T8月</th>
+                                <th>T9月</th>
+                                <th>T10月</th>
+                                <th>T11月</th>
+                                <th>T12月</th>
+                                <th>备注</th>                      
+                                <th>删除该行</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item, index) in result">
+                                <td :rowspan="getRowSpan(item, ['t1'])" :style="isDisplay(item, ['t1'])" v-html='item.t1'></td>
+
+                                <td :rowspan="getRowSpan(item, ['t1', 't2'])" :style="isDisplay(item, ['t1', 't2'])">
+                                    <span>{[item.t2]}</span>
+                                    <a href="#" @click="addNew2(item)">[+]</a>
+                                </td>
+
+                                <td :rowspan="getRowSpan(item, ['t1', 't2', 't3'])" :style="isDisplay(item, ['t1', 't2', 't3'])" contenteditable='true' @blur="handleTextInput(item,'t3')" v-html="">
+                                    <span>{[item.t3]}</span>
+                                    <a href="#" @click="addNew3(item)">[+]</a>
+                                </td>
+
+                                <td :rowspan="getRowSpan(item, ['t1', 't2', 't3', 't4'])" :style="isDisplay(item, ['t1', 't2', 't3', 't4'])" contenteditable='true' @blur="handleTextInput(item,'t4')" v-html="">
+                                    <span>{[item.t4]}</span>
+                                    <a href="#" @click="addNew4(item)">[+]</a>
+                                </td>
+
+                                <td :rowspan="getRowSpan(item, ['t1', 't2', 't3', 't4', 't5'])" :style="isDisplay(item, ['t1', 't2', 't3', 't4', 't5'])" contenteditable='true' @blur="handleTextInput(item,'t5')" v-html="">
+                                    <span>{[item.t5]}</span>
+                                    <a href="#" @click="addNew5(item)">[+]</a>
+                                </td>
+
+                                <td contenteditable='true' v-html="item.d1" @blur="handleInput(item,'d1')"></td>
+                                <td contenteditable='true' @blur="handleInput(item,'d2')" v-html="item.d2"></td>
+
+                                <td v-html="fake_sum(item)"></td>
+
+                                <td v-html="fake_value_style(item, item.d3)" contenteditable='true' @blur="handleInput(item,'d3')"></td>
+                                <td v-html="fake_value_style(item, item.d4)" contenteditable='true' @blur="handleInput(item,'d4')"></td>
+                                <td v-html="fake_value_style(item, item.d5)" contenteditable='true' @blur="handleInput(item,'d5')"></td>
+                                <td v-html="fake_value_style(item, item.d6)" contenteditable='true' @blur="handleInput(item,'d6')"></td>
+                                <td v-html="fake_value_style(item, item.d7)" contenteditable='true' @blur="handleInput(item,'d7')"></td>
+                                <td v-html="fake_value_style(item, item.d8)" contenteditable='true' @blur="handleInput(item,'d8')"></td>
+                                <td v-html="fake_value_style(item, item.d9)" contenteditable='true' @blur="handleInput(item,'d9')"></td>
+                                <td v-html="fake_value_style(item, item.d10)" contenteditable='true' @blur="handleInput(item,'d10')"></td>
+                                <td v-html="fake_value_style(item, item.d11)" contenteditable='true' @blur="handleInput(item,'d11')"></td>
+                                <td v-html="fake_value_style(item, item.d12)" contenteditable='true' @blur="handleInput(item,'d12')"></td>
+                                <td v-html="fake_value_style(item, item.d13)" contenteditable='true' @blur="handleInput(item,'d13')"></td>
+                                <td v-html="fake_value_style(item, item.d14)" contenteditable='true' @blur="handleInput(item,'d14')"></td>
+                                <td v-html="fake_value_style(item, item.d15)" contenteditable='true' @blur="handleInput(item,'d15')"></td>
+
+
+                                <td v-html="item.d17"></td>
+
+                                <td>
+                                    <a href="#" @click="remove(index)">[-]</a>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table v-if="fine_table_seen" class="table table-bordered table-condensed  table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>测算类型</th>
+                                <th>收益类型</th>                                
+                                <th>T0月</th>
+                                <th>T1月</th>
+                                <th>T2月</th>
+                                <th>T3月</th>
+                                <th>T4月</th>
+                                <th>T5月</th>
+                                <th>T6月</th>
+                                <th>T7月</th>
+                                <th>T8月</th>
+                                <th>T9月</th>
+                                <th>T10月</th>
+                                <th>T11月</th>
+                                <th>T12月</th>
+                                <th>合计</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item, index) in income">
+                                <td :rowspan="getRowSpan1(item, ['h1'])" :style="isDisplay1(item, ['h1'])" v-html='item.h1'></td>
+
+                                <td :rowspan="getRowSpan1(item, ['h1', 'h2'])" :style="isDisplay1(item, ['h1', 'h2'])" v-html='item.h2'></td>
+
+                                <td :style="style(item.h3)" v-html="item.h3.toFixed(2)"></td>
+                                <td :style="style(item.h4)" v-html="item.h4.toFixed(2)"></td>
+                                <td :style="style(item.h5)" v-html="item.h5.toFixed(2)"></td>
+                                <td :style="style(item.h6)" v-html="item.h6.toFixed(2)"></td>
+                                <td :style="style(item.h7)" v-html="item.h7.toFixed(2)"></td>
+                                <td :style="style(item.h8)" v-html="item.h8.toFixed(2)"></td>
+                                <td :style="style(item.h9)" v-html="item.h9.toFixed(2)"></td>
+                                <td :style="style(item.h10)" v-html="item.h10.toFixed(2)"></td>
+                                <td :style="style(item.h11)" v-html="item.h11.toFixed(2)"></td>
+                                <td :style="style(item.h12)" v-html="item.h12.toFixed(2)"></td>
+                                <td :style="style(item.h13)" v-html="item.h13.toFixed(2)"></td>
+                                <td :style="style(item.h14)" v-html="item.h14.toFixed(2)"></td>
+                                <td :style="style(item.h15)" v-html="item.h15.toFixed(2)"></td>
+                                <td :style="style(item.h16)" v-html="item.h16.toFixed(2)"></td>
+
+                              
+                            </tr>
+                        </tbody>
+                    </table>
+                  </template>
+                </el-table-column>
+              <el-table-column fixed prop="region_type" label="区域类型" > </el-table-column>
+              <el-table-column fixed prop="channel_type" label="渠道类型" > </el-table-column>
+              <el-table-column fixed prop="plan_type" label="套餐类型" > </el-table-column>
+              <el-table-column fixed prop="mobile_side_type" label="手机侧类型" > </el-table-column>
+              <el-table-column fixed prop="plan_generate_name" label="套餐通用名称" > </el-table-column>
+              <el-table-column fixed="right" label="操作" >
+                <template slot-scope="scope">
+                  <el-button @click="load_fine_table(scope.row)" type="text" size="small">查看</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </template>
+
+          
+      </el-tab-pane>
+      <el-tab-pane label="备份" name="second">
+          <el-row>
+              <el-form ref="form" :model="form" :inline="true" >
+                  <el-form-item label="区域类型">
+                      <el-select v-model="form.region_type" filterable multiple  placeholder="请选择区域类型">
+                          <el-option v-for="item in plan_detail.region_type" :key="item" :label="item" :value="item">
+                          </el-option>
+                      </el-select>
+                  </el-form-item>
+                  <el-form-item label="渠道类型">
+                      <el-select v-model="form.channel_type" filterable multiple  placeholder="请选择渠道类型">
+                          <el-option v-for="item in plan_detail.channel_type" :key="item" :label="item" :value="item">
+                          </el-option>
+                      </el-select>
+                  </el-form-item>
+                  <el-form-item label="套餐类型">
+                      <el-select v-model="form.plan_type" filterable multiple  placeholder="请选择套餐类型">
+                          <el-option v-for="item in plan.plan_type"  :label="item" :key="item" :value="item">
+                          </el-option>
+                      </el-select>
+                  </el-form-item>
+                  <el-form-item label="手机侧类型">
+                      <el-select v-model="form.mobile_side_type" filterable multiple  placeholder="请选择手机侧类型">
+                          <el-option v-for="item in plan.mobile_side_type" :key="item" :label="item" :value="item">
+                          </el-option>
+                      </el-select>
+                  </el-form-item>
+                  <el-form-item label="套餐通用名称">
+                      <el-select v-model="form.plan_generate_name" filterable multiple  placeholder="请选择套餐通用名称">
+                          <el-option v-for="item in plan.plan_generate_name" :key="item" :label="item" :value="item">
+                          </el-option>
+                      </el-select>
+                  </el-form-item>
+                  <el-form-item>
+                      <el-button type="primary" @click="load_coase_table">查询</el-button>
+                      <el-button v-if="back_button" type="primary" @click="load_back">返回</el-button>
+                  </el-form-item>
+                  <el-form-item>
+                      <el-button v-if="sava_button" type="primary" @click="save_table">保存</el-button>
+                  </el-form-item>
+              </el-form>
+          </el-row>
+
+          <template>
+            <el-table v-if="coase_table_seen" :data="coase_table_data" border style="width: 100%">
+              <el-table-column fixed prop="region_type" label="区域类型" > </el-table-column>
+              <el-table-column fixed prop="channel_type" label="渠道类型" > </el-table-column>
+              <el-table-column fixed prop="plan_type" label="套餐类型" > </el-table-column>
+              <el-table-column fixed prop="mobile_side_type" label="手机侧类型" > </el-table-column>
+              <el-table-column fixed prop="plan_generate_name" label="套餐通用名称" > </el-table-column>
+              <el-table-column fixed="right" label="操作" >
+                <template slot-scope="scope">
+                  <el-button @click="load_fine_table(scope.row)" type="text" size="small">查看</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </template>
+
+          <table v-if="fine_table_seen" class="table table-bordered table-striped table-hover">
+              <thead>
+                  <tr>
+                      <th>套餐通用名称</th>
+                      <th>一级分类</th>
+                      <th>二级分类</th>
+                      <th>三级分类</th>
+                      <th>成本支出类型</th>
+                      <th>套餐价值</th>
+                      <th>积分价值</th>                      
+                      <th>合计</th>                                
+                      <th>T0月</th>
+                      <th>T1月</th>
+                      <th>T2月</th>
+                      <th>T3月</th>
+                      <th>T4月</th>
+                      <th>T5月</th>
+                      <th>T6月</th>
+                      <th>T7月</th>
+                      <th>T8月</th>
+                      <th>T9月</th>
+                      <th>T10月</th>
+                      <th>T11月</th>
+                      <th>T12月</th>
+                      <th>备注</th>                      
+                      <th>删除该行</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr v-for="(item, index) in result">
+                      <td :rowspan="getRowSpan(item, ['t1'])" :style="isDisplay(item, ['t1'])" v-html='item.t1'></td>
+
+                      <td :rowspan="getRowSpan(item, ['t1', 't2'])" :style="isDisplay(item, ['t1', 't2'])">
+                          <span>{[item.t2]}</span>
+                          <a href="#" @click="addNew2(item)">[+]</a>
+                      </td>
+
+                      <td :rowspan="getRowSpan(item, ['t1', 't2', 't3'])" :style="isDisplay(item, ['t1', 't2', 't3'])" contenteditable='true' @blur="handleTextInput(item,'t3')" v-html="">
+                          <span>{[item.t3]}</span>
+                          <a href="#" @click="addNew3(item)">[+]</a>
+                      </td>
+
+                      <td :rowspan="getRowSpan(item, ['t1', 't2', 't3', 't4'])" :style="isDisplay(item, ['t1', 't2', 't3', 't4'])" contenteditable='true' @blur="handleTextInput(item,'t4')" v-html="">
+                          <span>{[item.t4]}</span>
+                          <a href="#" @click="addNew4(item)">[+]</a>
+                      </td>
+
+                      <td :rowspan="getRowSpan(item, ['t1', 't2', 't3', 't4', 't5'])" :style="isDisplay(item, ['t1', 't2', 't3', 't4', 't5'])" contenteditable='true' @blur="handleTextInput(item,'t5')" v-html="">
+                          <span>{[item.t5]}</span>
+                          <a href="#" @click="addNew5(item)">[+]</a>
+                      </td>
+
+                      <td contenteditable='true' v-html="item.d1" @blur="handleInput(item,'d1')"></td>
+                      <td contenteditable='true' @blur="handleInput(item,'d2')" v-html="item.d2"></td>
+
+                      <td v-html="fake_sum(item)"></td>
+
+                      <td v-html="fake_value_style(item, item.d3)" contenteditable='true' @blur="handleInput(item,'d3')"></td>
+                      <td v-html="fake_value_style(item, item.d4)" contenteditable='true' @blur="handleInput(item,'d4')"></td>
+                      <td v-html="fake_value_style(item, item.d5)" contenteditable='true' @blur="handleInput(item,'d5')"></td>
+                      <td v-html="fake_value_style(item, item.d6)" contenteditable='true' @blur="handleInput(item,'d6')"></td>
+                      <td v-html="fake_value_style(item, item.d7)" contenteditable='true' @blur="handleInput(item,'d7')"></td>
+                      <td v-html="fake_value_style(item, item.d8)" contenteditable='true' @blur="handleInput(item,'d8')"></td>
+                      <td v-html="fake_value_style(item, item.d9)" contenteditable='true' @blur="handleInput(item,'d9')"></td>
+                      <td v-html="fake_value_style(item, item.d10)" contenteditable='true' @blur="handleInput(item,'d10')"></td>
+                      <td v-html="fake_value_style(item, item.d11)" contenteditable='true' @blur="handleInput(item,'d11')"></td>
+                      <td v-html="fake_value_style(item, item.d12)" contenteditable='true' @blur="handleInput(item,'d12')"></td>
+                      <td v-html="fake_value_style(item, item.d13)" contenteditable='true' @blur="handleInput(item,'d13')"></td>
+                      <td v-html="fake_value_style(item, item.d14)" contenteditable='true' @blur="handleInput(item,'d14')"></td>
+                      <td v-html="fake_value_style(item, item.d15)" contenteditable='true' @blur="handleInput(item,'d15')"></td>
+
+
+                      <td v-html="item.d17"></td>
+
+                      <td>
+                          <a href="#" @click="remove(index)">[-]</a>
+                      </td>
+
+                  </tr>
+              </tbody>
+          </table>
+
+          <table v-if="fine_table_seen" class="table table-bordered table-condensed  table-striped table-hover">
+              <thead>
+                  <tr>
+                      <th>测算类型</th>
+                      <th>收益类型</th>                                
+                      <th>T0月</th>
+                      <th>T1月</th>
+                      <th>T2月</th>
+                      <th>T3月</th>
+                      <th>T4月</th>
+                      <th>T5月</th>
+                      <th>T6月</th>
+                      <th>T7月</th>
+                      <th>T8月</th>
+                      <th>T9月</th>
+                      <th>T10月</th>
+                      <th>T11月</th>
+                      <th>T12月</th>
+                      <th>合计</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr v-for="(item, index) in income">
+                      <td :rowspan="getRowSpan1(item, ['h1'])" :style="isDisplay1(item, ['h1'])" v-html='item.h1'></td>
+
+                      <td :rowspan="getRowSpan1(item, ['h1', 'h2'])" :style="isDisplay1(item, ['h1', 'h2'])" v-html='item.h2'></td>
+
+                      <td :style="style(item.h3)" v-html="item.h3.toFixed(2)"></td>
+                      <td :style="style(item.h4)" v-html="item.h4.toFixed(2)"></td>
+                      <td :style="style(item.h5)" v-html="item.h5.toFixed(2)"></td>
+                      <td :style="style(item.h6)" v-html="item.h6.toFixed(2)"></td>
+                      <td :style="style(item.h7)" v-html="item.h7.toFixed(2)"></td>
+                      <td :style="style(item.h8)" v-html="item.h8.toFixed(2)"></td>
+                      <td :style="style(item.h9)" v-html="item.h9.toFixed(2)"></td>
+                      <td :style="style(item.h10)" v-html="item.h10.toFixed(2)"></td>
+                      <td :style="style(item.h11)" v-html="item.h11.toFixed(2)"></td>
+                      <td :style="style(item.h12)" v-html="item.h12.toFixed(2)"></td>
+                      <td :style="style(item.h13)" v-html="item.h13.toFixed(2)"></td>
+                      <td :style="style(item.h14)" v-html="item.h14.toFixed(2)"></td>
+                      <td :style="style(item.h15)" v-html="item.h15.toFixed(2)"></td>
+                      <td :style="style(item.h16)" v-html="item.h16.toFixed(2)"></td>
+
+                    
+                  </tr>
+              </tbody>
+          </table>
+      </el-tab-pane>
+      <el-tab-pane label="上传数据" name="third">
+          <el-upload
+             class="upload-demo"
+             :on-preview="handlePreview"
+             :on-remove="handleRemove"
+             :before-remove="beforeRemove"
+             multiple
+             :limit="3"
+             :on-exceed="handleExceed"
+             :file-list="fileList"
+
+             :action="importFileUrl"
+             name="importfile"
+             :on-error="uploadError"
+             :on-success="uploadSuccess"
+             :before-upload="beforeAvatarUpload">
+            <el-button round type="primary">上传<i class="el-icon-upload el-icon--right"></i></el-button>
+            <div  class="el-upload__tip">只能上传xls/xlsx文件，且不超过10Mb</div>
+          </el-upload>
+      </el-tab-pane>
+      <el-tab-pane label="查询套餐" name="fourth">
+          <el-row>
+              <el-form ref="form" :model="form2" label-width="100px" :inline="true">                
+                  <el-form-item label="销售品名称">
+                      <el-input v-model="form2.plan_name" placeholder="请输入销售品名称"></el-input>
+                  </el-form-item>
+                  <el-form-item label="销售品ID">
+                      <el-input v-model="form2.plan_id" placeholder="请输入销售品ID"></el-input>
+                  </el-form-item>
+                  <el-form-item>
+                      <el-button type="primary" @click="load_plan_table">查询</el-button>
+                  </el-form-item>
+                  <el-form-item>
+                      <el-button v-if='NextClick' type="primary" @click="download">下载</el-button>
+                  </el-form-item>
+              </el-form>
+          </el-row>
+
+          <template>
+            <el-table
+              :data="table_plan_data"
+              height="750"
+              border
+              style="width: 100%"
+              v-if="seen">
+              <el-table-column
+                prop="plan_id"
+                label="销售品 ID"
+                width="180">
+              </el-table-column>
+              <el-table-column
+                prop="plan_name"
+                label="销售品名称"
+                width="180">
+              </el-table-column>
+              <el-table-column
+                prop="plan_area"
+                label="区域">
+              </el-table-column>
+              <el-table-column
+                prop="eff_date"
+                label="生效时间">
+              </el-table-column>
+              <el-table-column
+                prop="exp_date"
+                label="失效时间">
+              </el-table-column>
+              <el-table-column
+                prop="status_cd"
+                label="状态">
+              </el-table-column>
+              <el-table-column
+                prop="protocol_life_cycle"
+                label="协议期">
+              </el-table-column>
+              <el-table-column
+                prop="offer_type"
+                label="类型">
+              </el-table-column>
+            </el-table>
+          </template>
+      </el-tab-pane>
+    </el-tabs>
+  </div>
+</body>
+<!-- import Vue before Element -->
+<script src="static/vue.js"></script>
+<!-- import JavaScript -->
+<script src="static/element-ui.js"></script>
+<script src="static/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        delimiters: ['{[', ']}'],
+        el: '#app',
+        data: function () {
+            return {
+                activeName:'',
+                importFileUrl: 'input_data',
+                fileList: [],
+                plan:[],
+                plan_detail:[],
+                plan_serach_detail:[],
+                form:{
+                    region_type:'',
+                    channel_type:'',
+                    plan_type:'',
+                    mobile_side_type:'',
+                    plan_generate_name:''
+                },
+                form2:{
+                    plan_name:'',
+                    plan_id:''
+                },
+                coase_table_data:[],
+                table_data:[],
+                table_plan_data:[],
+                seen: false,
+                NextClick: false,
+                coase_table_seen: false,
+                fine_table_seen: false,
+                sava_button: false,
+                back_button: false,
+                loading: false,
+                style: function(val) {
+                  if (val < 0) {
+                    return  {
+                      color: 'red'
+                    }
+                  }
+                },
+                fake_value_style: function(item, value){
+                  if (item.t4=="现金流" && item.t5=="现金流" && value<0){
+                    return 0
+                  } else{
+                    return value
+                  }
+                },
+                fake_sum:function(item){
+                  month_list = ['d3','d4','d5','d6','d7','d8','d9','d10','d11','d12','d13','d14','d15']
+                  if (item.t5 === '现金流余额'){
+                      return ''
+                    }
+                  else{
+                    total=0
+                    for (i in month_list){
+                      ind = month_list[i]
+                      if (parseFloat(item[ind])>0){
+                        total=total+parseFloat(item[ind])
+                      }
+                    }
+                    return total.toFixed(2)
+                  }
+
+                }
+            }
+        },
+        computed: {
+            result: function () {
+                for (var i = 0; i < this.table_data.length; i++) {
+                    var item = this.table_data[i]
+                    item.d16 = parseFloat(item.d3)+parseFloat(item.d4)+parseFloat(item.d5)+parseFloat(item.d6)+parseFloat(item.d7)+parseFloat(item.d8)+parseFloat(item.d9)+parseFloat(item.d10)+parseFloat(item.d11)+parseFloat(item.d12)+parseFloat(item.d13)+parseFloat(item.d14)+parseFloat(item.d15)
+                    item.d16 = item.d16.toFixed(2)                    
+                }
+                return this.table_data.sort(this.sortFunc)
+            },
+
+            income: function() {
+                if(this.table_data.length==0) {
+                  return []
+                }
+                t0 = this.table_data.filter(item=>{return item.t4 === '现金流' && item.t5 === '现金流'})[0].d3-this.table_data.filter(item=>{return item.t3 === '渠道侧支出'}).reduce(function(a, b) { return a + parseFloat(b.d3);}, 0)-this.table_data.filter(item=>{return item.t3 === '用户侧支出'}).reduce(function(a, b) {return a + parseFloat(b.d3);}, 0)
+                t1 = this.table_data.filter(item=>{return item.t4 === '套餐收入' && item.t5 === '套餐收入'})[0].d4-this.table_data.filter(item=>{return item.t3 === '渠道侧支出'}).reduce(function(a, b) { return a + parseFloat(b.d4)}, 0)-this.table_data.filter(item=>{return item.t3 === '用户侧支出'}).reduce(function(a, b) { return a + parseFloat(b.d4)}, 0)-(this.table_data.filter(item=>{return item.t4 === '现金流' && item.t5 === '现金流'})[0].d3-this.table_data.filter(item=>{return item.t4 === '套餐收入' && item.t5 === '套餐收入'})[0].d3)
+                month_list = ['d5','d6','d7','d8','d9','d10','d11','d12','d13','d14','d15']
+                var name_list = ['t2','t3','t4','t5','t6','t7','t8','t9','t10','t11','t12']
+                for (i in month_list){
+                  ind = month_list[i]
+                  window[name_list[i]] = this.table_data.filter(item=>{return item.t4 === '套餐收入' && item.t5 === '套餐收入'})[0][ind]-this.table_data.filter(item=>{return item.t3 === '渠道侧支出'}).reduce(function(a, b) { return a + parseFloat(b[ind])}, 0)-this.table_data.filter(item=>{return item.t3 === '用户侧支出'}).reduce(function(a, b) { return a + parseFloat(b[ind])}, 0)
+                }
+                t13 = t0+t1+t2+t3+t4+t5+t6+t7+t8+t9+t10+t11+t12
+
+                if (this.table_data.filter(item=>{return item.t4 === '现金流' && item.t5 === '现金流余额'}).length==0)
+                  {return [{h1:'套餐收入版',h2:'当月收益', h3:t0, h4:t1, h5:t2, h6:t3, h7:t4, h8:t5, h9:t6, h10:t7, h11:t8, h12:t9, h13:t10, h14:t11, h15:t12, h16:t13},{h1:'套餐收入版',h2:'累计收益', h3:t0, h4:t0+t1, h5:t0+t1+t2, h6:t0+t1+t2+t3, h7:t0+t1+t2+t3+t4, h8:t0+t1+t2+t3+t4+t5, h9:t0+t1+t2+t3+t4+t5+t6, h10:t0+t1+t2+t3+t4+t5+t6+t7, h11:t0+t1+t2+t3+t4+t5+t6+t7+t8, h12:t0+t1+t2+t3+t4+t5+t6+t7+t8+t9, h13:t0+t1+t2+t3+t4+t5+t6+t7+t8+t9+t10, h14:t0+t1+t2+t3+t4+t5+t6+t7+t8+t9+t10+t11, h15:t0+t1+t2+t3+t4+t5+t6+t7+t8+t9+t10+t11+t12, h16:t13}].sort(this.sortFunc1)}
+                else {
+                  // 现金流版当月收益
+                  ct0 = this.table_data.filter(item=>{return item.t4 === '现金流' && item.t5 === '现金流'})[0].d3-this.table_data.filter(item=>{return item.t3 === '渠道侧支出'}).reduce(function(a, b) { return a + parseFloat(b.d3)}, 0)
+
+                  month_list1 = ['d4','d5','d6','d7','d8','d9','d10','d11','d12','d13','d14','d15']
+                  var name_list1 = ['ct1','ct2','ct3','ct4','ct5','ct6','ct7','ct8','ct9','ct10','ct11','ct12']
+                  for (i in month_list1){
+                    ind = month_list1[i]
+                    ct_condition = this.table_data.filter(item=>{return item.t4 === '现金流' && item.t5 === '现金流余额'})[0][ind]
+                    if (ct_condition>=0){
+                      window[name_list1[i]]=0-this.table_data.filter(item=>{return item.t3 === '渠道侧支出'}).reduce(function(a, b) { return a + parseFloat(b[ind])}, 0)
+                    } else {
+                      window[name_list1[i]]=0-ct_condition-this.table_data.filter(item=>{return item.t3 === '渠道侧支出'}).reduce(function(a, b) { return a + parseFloat(b[ind])}, 0)
+                    }
+                  }
+
+                  ct13 = ct0+ct1+ct2+ct3+ct4+ct5+ct6+ct7+ct8+ct9+ct10+ct11+ct12 
+
+                  return [{h1:'套餐收入版',h2:'当月收益', h3:t0, h4:t1, h5:t2, h6:t3, h7:t4, h8:t5, h9:t6, h10:t7, h11:t8, h12:t9, h13:t10, h14:t11, h15:t12, h16:t13},{h1:'套餐收入版',h2:'累计收益', h3:t0, h4:t0+t1, h5:t0+t1+t2, h6:t0+t1+t2+t3, h7:t0+t1+t2+t3+t4, h8:t0+t1+t2+t3+t4+t5, h9:t0+t1+t2+t3+t4+t5+t6, h10:t0+t1+t2+t3+t4+t5+t6+t7, h11:t0+t1+t2+t3+t4+t5+t6+t7+t8, h12:t0+t1+t2+t3+t4+t5+t6+t7+t8+t9, h13:t0+t1+t2+t3+t4+t5+t6+t7+t8+t9+t10, h14:t0+t1+t2+t3+t4+t5+t6+t7+t8+t9+t10+t11, h15:t0+t1+t2+t3+t4+t5+t6+t7+t8+t9+t10+t11+t12, h16:t13},{h1:'现金流收入版',h2:'当月收益', h3:ct0, h4:ct1, h5:ct2, h6:ct3, h7:ct4, h8:ct5, h9:ct6, h10:ct7, h11:ct8, h12:ct9, h13:ct10, h14:ct11, h15:ct12, h16:ct13},{h1:'现金流收入版',h2:'累计收益', h3:ct0, h4:ct0+ct1, h5:ct0+ct1+ct2, h6:ct0+ct1+ct2+ct3, h7:ct0+ct1+ct2+ct3+ct4, h8:ct0+ct1+ct2+ct3+ct4+ct5, h9:ct0+ct1+ct2+ct3+ct4+ct5+ct6, h10:ct0+ct1+ct2+ct3+ct4+ct5+ct6+ct7, h11:ct0+ct1+ct2+ct3+ct4+ct5+ct6+ct7+ct8, h12:ct0+ct1+ct2+ct3+ct4+ct5+ct6+ct7+ct8+ct9, h13:ct0+ct1+ct2+ct3+ct4+ct5+ct6+ct7+ct8+ct9+ct10, h14:ct0+ct1+ct2+ct3+ct4+ct5+ct6+ct7+ct8+ct9+ct10+ct11, h15:ct0+ct1+ct2+ct3+ct4+ct5+ct6+ct7+ct8+ct9+ct10+ct11+ct12, h16:ct13}].sort(this.sortFunc1)
+                  }
+            }
+        },
+        methods: {
+            remove: function(index) {
+                this.table_data.splice(index, 1)
+            },
+            handleInput: function(item, field) {
+                item[field] = parseFloat(event.target.innerText)
+            },
+            handleTextInput: function(item, field) {
+                item[field] = event.target.children[0].innerText.trim()
+            },
+            handleRemove(file, fileList) {
+                console.log(file, fileList);
+            },
+            handlePreview(file) {
+                console.log(file);
+            },
+            handleExceed(files, fileList) {
+                this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+            },
+            beforeRemove(file, fileList) {
+                return this.$confirm(`确定移除 ${ file.name }？`);
+            },
+            // 上传成功后的回调
+            uploadSuccess (response, file, fileList) {
+              this.$alert(response.errmsg, '提示', {
+                confirmButtonText: '确定'
+                })  
+            },
+            // 上传错误
+            uploadError (response, file, fileList) {
+              console.log('上传失败，请重试！')
+            },
+            // 上传前对文件的大小的判断
+            beforeAvatarUpload (file) {
+                const extension = file.name.split('.')[1] === 'xls'
+                const extension2 = file.name.split('.')[1] === 'xlsx'
+                const isLt2M = file.size / 1024 / 1024 < 10
+                if (!extension && !extension2) {
+                    console.log('上传模板只能是 xls、xlsx 格式!')
+                }
+                if (!isLt2M) {
+                    console.log('上传模板大小不能超过 10MB!')
+                }
+                return extension || extension2 && isLt2M
+            },
+            loaddata: function () {
+                axios.get('list_data')
+                    .then(response => {
+                        this.plan = response.data.plan
+                        this.plan_detail = response.data.plan_detail
+                    })
+                    .catch(function (error) {
+                        console.log(error)
+                    });
+            },
+            remoteMethod: function(query){
+                if (query !== '') {
+                    this.loading = true;
+                    axios.get('list_plan_data').then(response => {
+                        this.plan_serach_detail = response.data.plan_serach_detail
+                        this.loading = false;
+                    }).catch(function (error) {
+                        console.log(error)
+                    });
+                } else {
+                  this.plan_serach_detail = [];}
+            },
+
+            clear_cache_tab1: function (tab_inst){
+                // console.log(tab_inst.label)
+                if (tab_inst.label!="查询套餐"){
+                    this.plan_serach_detail = [];
+                    this.table_plan_data = [];
+                    this.seen=false;
+                } 
+            },
+            load_coase_table: function() {
+                var data = this.form
+                axios.post('search_coase', data)
+                    .then(response => {
+                        if (response.data.errcode == 0) {
+                            axios.get('search_coase')
+                                .then(response => {
+                                    this.coase_table_data = response.data.result
+                                    this.coase_table_seen=true
+                                    this.back_button=false
+                                })
+                                .catch(function (error) {
+                                    console.log(error)
+                                });
+                            this.$alert('操作成功', '提示', {
+                                confirmButtonText: '确定'
+                            }
+                            );
+                        } else {
+                            this.$alert('处理失败：' + response.data.errmsg, '错误', {
+                                confirmButtonText: '确定',
+                            });
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        alert(error)
+                    });
+
+            },
+            load_fine_table: function(row) {
+                this.coase_table_seen=false
+                this.fine_table_seen=true
+                var data = row
+                this.form=row
+                axios.post('search', data)
+                    .then(response => {
+                        if (response.data.errcode == 0) {
+                            axios.get('search')
+                                .then(response => {
+                                    this.table_data = response.data.result
+                                    this.coase_table_seen=false
+                                    this.fine_table_seen=true
+                                    this.back_button=true
+                                    this.sava_button=true
+                                })
+                                .catch(function (error) {
+                                    console.log(error)
+                                });
+                            this.$alert('操作成功', '提示', {
+                                confirmButtonText: '确定'
+                            }
+                            );
+                        } else {
+                            this.$alert('处理失败：' + response.data.errmsg, '错误', {
+                                confirmButtonText: '确定',
+                            });
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        alert(error)
+                    });
+                
+            },
+            load_fine_table1: function(row) {
+                this.fine_table_seen=true
+                var data = row
+                this.form=row
+                axios.post('search', data)
+                    .then(response => {
+                        if (response.data.errcode == 0) {
+                            axios.get('search')
+                                .then(response => {
+                                    this.table_data = response.data.result
+                                    this.fine_table_seen=true
+                                    this.back_button=true
+                                    this.sava_button=true
+                                })
+                                .catch(function (error) {
+                                    console.log(error)
+                                });
+                            this.$alert('操作成功', '提示', {
+                                confirmButtonText: '确定'
+                            }
+                            );
+                        } else {
+                            this.$alert('处理失败：' + response.data.errmsg, '错误', {
+                                confirmButtonText: '确定',
+                            });
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        alert(error)
+                    });
+                
+            },
+            load_back: function() {
+                this.coase_table_seen=true
+                this.fine_table_seen=false
+                this.back_button=false
+                this.sava_button=false
+                this.form = {                    
+                    region_type:'',
+                    channel_type:'',
+                    plan_type:'',
+                    mobile_side_type:'',
+                    plan_generate_name:''
+                }
+            },
+
+            save_table: function() {
+                var data = this.form
+                data.table_data = this.table_data
+                this.$confirm('此操作将永久覆盖原有数据, 是否继续?', '提示', {
+                  confirmButtonText: '确定',
+                  cancelButtonText: '取消',
+                  type: 'warning',
+                  center: true
+                }).then(() => {
+                  axios.post('save_table', data)
+                            .then(response => {
+                                if (response.data.errcode == 0) {
+                                    this.$message({
+                                        type: 'success',
+                                        message: '保存成功!'
+                                    });
+                                } else {
+                                    this.$alert('保存失败：' + response.data.errmsg, '错误', {
+                                        confirmButtonText: '确定',
+                                    });
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                                alert(error)
+                        });
+                }).catch(() => {
+                  this.$message({
+                    type: 'info',
+                    message: '已取消保存'
+                  });
+                });
+                
+                this.seen=true;
+                this.NextClick=true;
+            },
+
+            load_plan_table: function() {
+                var data = this.form2
+                this.loading=true
+                axios.post('search_plan', data)
+                    .then(response => {
+                        if (response.data.errcode == 0) {
+                            axios.get('search_plan')
+                                .then(response => {
+                                    this.table_plan_data = response.data.result
+                                    this.loading=false
+                                })
+                                .catch(function (error) {
+                                    console.log(error)
+                                });
+                            this.$alert('操作成功', '提示', {
+                                confirmButtonText: '确定'
+                            }
+                            );
+                        } else {
+                            this.$alert('处理失败：' + response.data.errmsg, '错误', {
+                                confirmButtonText: '确定',
+                            });
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        alert(error)
+                    });
+                this.seen=true;
+                this.NextClick=true;
+            },
+
+            download: function() {
+
+                window.location.href='download?time'+new Date()
+            },
+
+            isDisplay: function (row, col) {
+                currentIndex = this.result.indexOf(row)
+                subArray = this.result.filter((currentValue, index, arr) => {
+                    return this.testSubArray(currentValue, col, row)
+                })
+                restArray = this.result.filter((currentValue, index, arr) => {
+                    return index >= currentIndex && this.testSubArray(currentValue, col, row)
+                })
+
+                return subArray.length == restArray.length ? {} : { display: 'none' }
+            },
+            getRowSpan: function (row, col) {
+                subArray = this.result.filter((currentValue, index, arr) => {
+                    return this.testSubArray(currentValue, col, row)
+                })
+                return subArray.length
+            },
+
+            isDisplay1: function (row, col) {
+                currentIndex = this.income.indexOf(row)
+                subArray = this.income.filter((currentValue, index, arr) => {
+                    return this.testSubArray(currentValue, col, row)
+                })
+                restArray = this.income.filter((currentValue, index, arr) => {
+                    return index >= currentIndex && this.testSubArray(currentValue, col, row)
+                })
+
+                return subArray.length == restArray.length ? {} : { display: 'none' }
+            },
+            getRowSpan1: function (row, col) {
+                subArray = this.income.filter((currentValue, index, arr) => {
+                    return this.testSubArray(currentValue, col, row)
+                })
+                return subArray.length
+            },
+            testSubArray: function (currentValue, col, row) {
+                for (i in col) {
+                    if (row[col[i]] != currentValue[col[i]]) {
+                        return false
+                    }
+                    
+                }
+                return true
+            },                    
+            sortFunc: function (x, y) {
+                if (x.t1 > y.t1) {
+                    return 1
+                } else if (x.t1 < y.t1) {
+                    return -1
+                } else if (x.t2 > y.t2) {
+                    return 1
+                } else if (x.t2 < y.t2) {
+                    return -1
+                } else if (x.t3 > y.t3) {
+                    return 1
+                } else if (x.t3 < y.t3) {
+                    return -1
+                } else if (x.t4 > y.t4) {
+                    return 1
+                } else if (x.t4 < y.t4) {
+                    return -1
+                } else if (x.t5 > y.t5) {
+                    return 1
+                } else if (x.t5 < y.t5) {
+                    return -1
+                } else{
+                    return 0
+                }
+            },
+
+            sortFunc1: function (x, y) {
+                if (x.h1 > y.h1) {
+                    return 1
+                } else if (x.h1 < y.h1) {
+                    return -1
+                } else if (x.h2 > y.h2) {
+                    return 1
+                } else if (x.h2 < y.h2) {
+                    return -1
+                } else {
+                    return 0
+                }
+            },
+            addNew2: function (row) {
+                var newitem = {
+                    t1: row.t1,
+                    t2: row.t2,
+                    t3: '增加第三列',
+                    t4: '增加第四列',
+                    t5: '增加第五列',
+                    d1: '0',
+                    d2: '0',
+                    d3: '0',
+                    d4: '0',
+                    d5: '0',
+                    d6: '0',
+                    d7: '0',
+                    d8: '0',
+                    d9: '0',
+                    d10: '0',
+                    d11: '0',
+                    d12: '0',
+                    d13: '0',
+                    d14: '0',
+                    d15: '0',
+                    d17: '',
+                    isNew2: true
+                }
+                this.table_data.push(newitem)
+            },
+            addNew3: function (row) {
+                var newitem = {
+                    t1: row.t1,
+                    t2: row.t2,
+                    t3: row.t3,
+                    t4: '增加第四列',
+                    t5: '增加第五列',
+                    d1: '0',
+                    d2: '0',
+                    d3: '0',
+                    d4: '0',
+                    d5: '0',
+                    d6: '0',
+                    d7: '0',
+                    d8: '0',
+                    d9: '0',
+                    d10: '0',
+                    d11: '0',
+                    d12: '0',
+                    d13: '0',
+                    d14: '0',
+                    d15: '0',
+                    d17: '',
+                    isNew3: true
+                }
+                this.table_data.push(newitem)
+            },
+            addNew4: function (row) {
+                var newitem = {
+                    t1: row.t1,
+                    t2: row.t2,
+                    t3: row.t3,
+                    t4: row.t4,
+                    t5: '增加第五列',
+                    d1: '0',
+                    d2: '0',
+                    d3: '0',
+                    d4: '0',
+                    d5: '0',
+                    d6: '0',
+                    d7: '0',
+                    d8: '0',
+                    d9: '0',
+                    d10: '0',
+                    d11: '0',
+                    d12: '0',
+                    d13: '0',
+                    d14: '0',
+                    d15: '0',
+                    d17: '',
+                    isNew4: true
+                }
+                this.table_data.push(newitem)
+            },
+            addNew5: function (row) {
+                var newitem = {
+                    t1: row.t1,
+                    t2: row.t2,
+                    t3: row.t3,
+                    t4: row.t4,
+                    t5: row.t5,
+                    d1: '0',
+                    d2: '0',
+                    d3: '0',
+                    d4: '0',
+                    d5: '0',
+                    d6: '0',
+                    d7: '0',
+                    d8: '0',
+                    d9: '0',
+                    d10: '0',
+                    d11: '0',
+                    d12: '0',
+                    d13: '0',
+                    d14: '0',
+                    d15: '0',
+                    d17: '',
+                    isNew5: true
+                }
+                this.table_data.push(newitem)
+            },             
+        },
+        mounted() {
+            this.loaddata()
+        }
+    })
+    document.ondragstart = function(){return false;};
+
+</script>
+
+</html>
