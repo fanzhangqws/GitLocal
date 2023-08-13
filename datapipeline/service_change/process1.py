@@ -120,7 +120,7 @@ while True:
                 elif query.servicecode=='普通电话接入':
                     servicecode='VOIP-Route-PPP'
                     if query.ordertype=='新装':
-                        parameters = 'SIPUserName=+8629%s@sn.ctcims.cn,SIPPassword=i8n7as1' %(query.acc_nbr)
+                        parameters = 'SIPUserName=xxx,SIPPassword=xxx' %(query.acc_nbr)
                     else:
                         parameters = ''
                 else:

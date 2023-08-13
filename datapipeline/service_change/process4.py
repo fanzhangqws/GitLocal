@@ -36,8 +36,8 @@ while True:
     try:
 
         server = ftplib.FTP()
-        server.connect('133.68.255.73', 21)
-        server.login('ctccxa','P@ssw0rd')
+        server.connect('x.x.x.x', xx)
+        server.login('xx','xxx')
         server.encoding='gbk'
         file_list = server.nlst()
 

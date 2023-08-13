@@ -29,7 +29,7 @@ app_log.addHandler(my_handler)
 session_web = requests.Session()
 session_web.verify = False
 transport = Transport(session=session_web)
-wsdl = 'http://133.68.255.73:64401/serviceList.asmx?WSDL'
+wsdl = 'http://xx.xx.xx.xx:xxxx/serviceList.asmx?WSDL'
 client = zeep.Client(wsdl=wsdl, transport=transport)
 
 # generate database schema
